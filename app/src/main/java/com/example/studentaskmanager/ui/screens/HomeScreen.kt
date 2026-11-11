@@ -3,16 +3,17 @@ package com.example.studentaskmanager.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.studentaskmanager.data.DatabaseHelper
 import com.example.studentaskmanager.data.Session
 import com.example.studentaskmanager.data.Task
 import com.example.studentaskmanager.ui.components.*
@@ -24,13 +25,20 @@ import com.example.studentaskmanager.viewmodel.TaskViewModel
 fun HomeScreen(
     vm: TaskViewModel = viewModel(),
     onAddClick: () -> Unit = {},
-    onTaskClick: (Int) -> Unit = {}
+    onTaskClick: (Int) -> Unit = {},
+    onLockApp: () -> Unit = {},
+    onResetAccount: () -> Unit = {},
+    onChangePin: () -> Unit = {}
 ) {
-    val tasks by vm.tasks.collectAsState()
+    LaunchedEffect(Unit) { vm.reload() }
 
-    // This holds the selected tab (home, tasks, progress, profile)
+    val tasks by vm.tasks.collectAsState()
+    val completedDates by vm.completedDates.collectAsState()
     var currentTab by rememberSaveable { mutableStateOf("home") }
-    val pending = tasks.count { !it.completed }
+
+    // Fetch security question for the profile page
+    val db = DatabaseHelper.get(androidx.compose.ui.platform.LocalContext.current)
+    val securityQuestion = remember { db.getSecurityQuestionById(Session.userId) ?: "Not set" }
 
     Scaffold(
         containerColor = Cream,
@@ -42,41 +50,44 @@ fun HomeScreen(
             )
         }
     ) { padding ->
-        // Apply bottom padding so content doesn't hide behind the nav bar
         Box(modifier = Modifier.padding(bottom = padding.calculateBottomPadding())) {
             when (currentTab) {
-                "home" -> {
-                    HomeContent(
-                        userName = Session.username,
-                        tasks = tasks,
-                        onToggle = { vm.toggle(it) },
-                        onTaskClick = onTaskClick
+                "home" -> HomeContent(
+                    userName = Session.username,
+                    tasks = tasks,
+                    onMarkComplete = { vm.markComplete(it) },
+                    onTaskClick = onTaskClick
+                )
+                "tasks" -> TasksContent(
+                    tasks = tasks,
+                    onMarkComplete = { vm.markComplete(it) },
+                    onTaskClick = onTaskClick
+                )
+                "progress" -> ProgressContent(
+                    tasks = tasks,
+                    completedDates = completedDates
+                )
+                "profile" -> {
+                    // CONNECTED THE NEW PROFILE SCREEN HERE
+                    ProfileContent(
+                        securityQuestion = securityQuestion,
+                        onLockApp = onLockApp,
+                        onResetAccount = onResetAccount,
+                        onChangePin = onChangePin
                     )
-                }
-                "tasks" -> {
-                    TasksContent(
-                        tasks = tasks,
-                        onToggle = { vm.toggle(it) },
-                        onTaskClick = onTaskClick
-                    )
-                }
-                else -> {
-                    // Placeholder for Progress and Profile
-                    Box(Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
-                        Text("Coming Soon...", fontFamily = FontFamily.Serif, fontSize = 24.sp)
-                    }
                 }
             }
         }
     }
 }
 
-// --- HOME TAB CONTENT ---
+// ... (HomeContent stays the same) ...
+
 @Composable
 fun HomeContent(
     userName: String,
     tasks: List<Task>,
-    onToggle: (Task) -> Unit,
+    onMarkComplete: (Task) -> Unit,
     onTaskClick: (Int) -> Unit
 ) {
     val pending = tasks.count { !it.completed }
@@ -120,7 +131,7 @@ fun HomeContent(
         items(tasks, key = { it.id }) { task ->
             TaskCard(
                 task = task,
-                onToggle = { onToggle(task) },
+                onMarkComplete = { onMarkComplete(task) },
                 onClick = { onTaskClick(task.id) },
                 modifier = Modifier.padding(horizontal = 24.dp, vertical = 6.dp)
             )

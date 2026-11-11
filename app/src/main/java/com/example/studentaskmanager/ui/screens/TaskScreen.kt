@@ -30,7 +30,7 @@ import com.example.studentaskmanager.ui.theme.Navy
 @Composable
 fun TasksContent(
     tasks: List<Task>,
-    onToggle: (Task) -> Unit,
+    onMarkComplete: (Task) -> Unit, // <-- CHANGED HERE
     onTaskClick: (Int) -> Unit
 ) {
     var searchQuery by remember { mutableStateOf("") }
@@ -151,7 +151,7 @@ fun TasksContent(
                 items(filteredTasks, key = { it.id }) { task ->
                     TaskCard(
                         task = task,
-                        onToggle = { onToggle(task) },
+                        onMarkComplete = { onMarkComplete(task) }, // <-- CHANGED HERE
                         onClick = { onTaskClick(task.id) }
                     )
                 }

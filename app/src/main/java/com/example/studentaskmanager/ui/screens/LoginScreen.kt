@@ -39,32 +39,38 @@ fun LoginScreen(
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Center
     ) {
+        // THE NEW ARIA WELCOME MESSAGE
         Text(
-            text = "Welcome back.\nLet's conquer\nyour day.",
+            text = "Hi, I'm\nARIA!",
             fontFamily = FontFamily.Serif,
             fontWeight = FontWeight.Bold,
-            fontSize = 40.sp,
+            fontSize = 42.sp,
             color = Ink,
-            lineHeight = 46.sp
+            lineHeight = 48.sp
         )
 
         Spacer(Modifier.height(12.dp))
 
         Text(
-            text = "Log in to see your tasks and keep the momentum going.",
-            fontSize = 16.sp,
+            text = "Your Academic Reminder & Information Assistant. I'm here to help you stay organized, track your tasks, and conquer your day. Log in or create an account to get started!",
+            fontSize = 15.sp,
             color = Ink.copy(alpha = 0.6f),
             lineHeight = 22.sp
         )
 
-        Spacer(Modifier.height(40.dp))
+        Spacer(Modifier.height(32.dp))
 
         OutlinedTextField(
             value = username,
             onValueChange = { username = it; errorMessage = null },
             label = { Text("Username") },
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp)
+            shape = RoundedCornerShape(12.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = Ink, unfocusedTextColor = Ink,
+                focusedLabelColor = Navy, unfocusedLabelColor = Ink.copy(alpha = 0.6f),
+                cursorColor = Navy, focusedBorderColor = Navy, unfocusedBorderColor = Ink.copy(alpha = 0.3f)
+            )
         )
 
         Spacer(Modifier.height(16.dp))
@@ -76,7 +82,12 @@ fun LoginScreen(
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp)
+            shape = RoundedCornerShape(12.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = Ink, unfocusedTextColor = Ink,
+                focusedLabelColor = Navy, unfocusedLabelColor = Ink.copy(alpha = 0.6f),
+                cursorColor = Navy, focusedBorderColor = Navy, unfocusedBorderColor = Ink.copy(alpha = 0.3f)
+            )
         )
 
         if (errorMessage != null) {
@@ -84,7 +95,7 @@ fun LoginScreen(
             Text(text = errorMessage!!, color = Color.Red, fontSize = 14.sp)
         }
 
-        Spacer(Modifier.height(32.dp))
+        Spacer(Modifier.height(24.dp))
 
         Button(
             onClick = {
@@ -92,17 +103,11 @@ fun LoginScreen(
                     errorMessage = "Please fill in all fields"
                 } else {
                     viewModel.login(username, password) { success ->
-                        if (success) {
-                            onLoggedIn()
-                        } else {
-                            errorMessage = "Incorrect username or password."
-                        }
+                        if (success) onLoggedIn() else errorMessage = "Incorrect username or password."
                     }
                 }
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
+            modifier = Modifier.fillMaxWidth().height(56.dp),
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Navy)
         ) {

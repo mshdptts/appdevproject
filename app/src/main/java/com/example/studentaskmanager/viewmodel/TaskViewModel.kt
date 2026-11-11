@@ -19,43 +19,48 @@ class TaskViewModel(app: Application) : AndroidViewModel(app) {
     private val _tasks = MutableStateFlow<List<Task>>(emptyList())
     val tasks: StateFlow<List<Task>> = _tasks
 
-    init { reload() }
+    private val _completedDates = MutableStateFlow<List<String>>(emptyList())
+    val completedDates: StateFlow<List<String>> = _completedDates
+
+    init {
+        if (Session.userId != 0) reload()
+    }
 
     fun reload() {
         viewModelScope.launch(Dispatchers.IO) {
             _tasks.value = db.getTasks(Session.userId)
+            _completedDates.value = db.getCompletedDates(Session.userId)
         }
     }
 
-    fun toggle(task: Task) {
+    fun markComplete(task: Task) {
+        if (task.completed) return // Prevent reversing from here
         viewModelScope.launch(Dispatchers.IO) {
-            val nowDone = !task.completed
-            db.updateTask(
-                task.copy(
-                    completed = nowDone,
-                    completedAt = if (nowDone) LocalDate.now().toString() else null
-                )
-            )
-            _tasks.value = db.getTasks(Session.userId)
+            db.markTaskComplete(task.id, Session.userId, LocalDate.now().toString())
+            reload()
         }
     }
-
-    // ADDED DELETE FUNCTION
-    fun delete(task: Task) {
-        viewModelScope.launch(Dispatchers.IO) {
-            db.deleteTask(task.id)
-            _tasks.value = db.getTasks(Session.userId)
-        }
-    }
-    // Add this function inside your TaskViewModel class
 
     fun addTask(title: String, description: String, dueDate: String, priority: String, onSuccess: () -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             db.addTask(Session.userId, title, description, dueDate, priority)
-            _tasks.value = db.getTasks(Session.userId)
-            withContext(Dispatchers.Main) {
-                onSuccess()
-            }
+            reload()
+            withContext(Dispatchers.Main) { onSuccess() }
+        }
+    }
+
+    fun updateTask(updatedTask: Task, onSuccess: () -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            db.updateTask(updatedTask)
+            reload()
+            withContext(Dispatchers.Main) { onSuccess() }
+        }
+    }
+
+    fun delete(task: Task) {
+        viewModelScope.launch(Dispatchers.IO) {
+            db.deleteTask(task.id)
+            reload()
         }
     }
 }

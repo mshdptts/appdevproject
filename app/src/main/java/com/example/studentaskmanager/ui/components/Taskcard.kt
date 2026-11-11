@@ -27,7 +27,7 @@ import com.example.studentaskmanager.utils.dueInfo
 @Composable
 fun TaskCard(
     task: Task,
-    onToggle: () -> Unit,
+    onMarkComplete: () -> Unit,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -43,7 +43,6 @@ fun TaskCard(
         border = BorderStroke(1.dp, Ink.copy(alpha = 0.15f))
     ) {
         Column(Modifier.padding(16.dp)) {
-            // Top Row: Title and Complete Pill
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.Top,
@@ -63,14 +62,15 @@ fun TaskCard(
 
                 Spacer(Modifier.width(8.dp))
 
-                // Complete Pill Button
                 Surface(
                     shape = RoundedCornerShape(50),
                     color = if (task.completed) Color(0xFFDDEBDD) else PaleBlue,
-                    modifier = Modifier.clickable { onToggle() }
+                    modifier = Modifier.clickable {
+                        if (!task.completed) onMarkComplete()
+                    }
                 ) {
                     Text(
-                        text = if (task.completed) "COMPLETED" else "MAKE COMPLETE",
+                        text = if (task.completed) "COMPLETED" else "MARK COMPLETE",
                         fontSize = 9.sp,
                         fontWeight = FontWeight.Bold,
                         color = if (task.completed) Color(0xFF1E6B2E) else Navy,
@@ -92,7 +92,6 @@ fun TaskCard(
 
             Spacer(Modifier.height(16.dp))
 
-            // Bottom Row: Priority and Date
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,

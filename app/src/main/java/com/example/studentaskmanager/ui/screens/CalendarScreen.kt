@@ -32,7 +32,7 @@ import java.util.Locale
 @Composable
 fun CalendarContent(
     tasks: List<Task>,
-    onToggle: (Task) -> Unit,
+    onMarkComplete: (Task) -> Unit, // <-- UPDATED
     onTaskClick: (Int) -> Unit
 ) {
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
@@ -96,7 +96,7 @@ fun CalendarContent(
 
         Spacer(Modifier.height(12.dp))
 
-        // 4. Safe Calendar Grid (No LazyVerticalGrid crash)
+        // 4. Safe Calendar Grid
         CalendarGridSafe(
             currentMonth = currentMonth,
             selectedDate = selectedDate,
@@ -121,7 +121,11 @@ fun CalendarContent(
         } else {
             Column(modifier = Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 tasksForSelectedDate.forEach { task ->
-                    TaskCard(task = task, onToggle = { onToggle(task) }, onClick = { onTaskClick(task.id) })
+                    TaskCard(
+                        task = task,
+                        onMarkComplete = { onMarkComplete(task) }, // <-- UPDATED
+                        onClick = { onTaskClick(task.id) }
+                    )
                 }
             }
         }
