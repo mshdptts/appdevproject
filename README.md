@@ -8,7 +8,7 @@ ARIA provides a distraction-free workflow for creating tasks, prioritizing deadl
 
 The latest published APK is available from the [`apkrelease` GitHub release](https://github.com/mshdptts/appdevproject/releases/tag/apkrelease).
 
-**[Download ARIA.V1.5.0.apk](ARIA.V1.5.0.SDK33.apk)**
+**[Download ARIA.V1.5.0.apk](https://github.com/mshdptts/appdevproject/releases/download/apkrelease/ARIA.V1.5.0.SDK33.apk)**
 
 ### Install on an Android device
 
